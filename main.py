@@ -1,5 +1,4 @@
-from comms import *
-from controls import *
+import controls
 
 """ Values for the Robot """
 THRUSTERS = {
@@ -22,3 +21,6 @@ ARM = {
     "CLAW":  1500
 }
 
+""" Starting the Robot """
+
+controls.init_joysticks()
