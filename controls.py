@@ -2,7 +2,7 @@ import pygame, time
 
 # Helpful to convert Joystick to servo values
 def map(t, min, max, new_min, new_max):
-    return float( ((new_max - new_min) * (t - min)) / (max - min) + new_min )
+    return float((new_max - new_min) * (t - min)) / (max - min) + new_min 
 
 # Initialize pygame / joysticks
 pygame.init()
@@ -33,7 +33,8 @@ joy1_data = {
     "LR" : 0, 
     "TW" : 0, 
     "RE": 0, 
-    "CAM_TILT": 0
+    "CAM_TILT": 0,
+    "VERT": 0,
 }
 
 joy2_data = {
@@ -86,9 +87,15 @@ def impose_deadzone(val):
 switch_cam_pressed = False
 def get_input():
     """ First Controller (Movement) """
+    # Horizontal inputs
     joy1_data["LR"] = impose_deadzone(joy1.get_hat(0)[0])
     joy1_data["FB"] = impose_deadzone(joy1.get_axis(1)) # (- = forward, + = backward) 
     joy1_data["TW"] = impose_deadzone(joy1.get_axis(2)) # (- = twist_left, + = twist_right)
+    
+    # Vertical inputs
+    joy1_data["VERT"] = joy1.get_button(4) - joy1.get_button(2)
+
+    # Misc inputs
     joy1_data["CAM_TILT"] = joy1.get_axis(3)
 
     # Slowdown button pressed
@@ -102,8 +109,26 @@ def get_input():
     joy2_data["RE"] = joy2.get_axis(3)
     joy2_data["TW"] = joy2.get_axis(2)
 
-def process_data(img):
-    pass
+def process_data():
+    """ Horizontal Thrusters """
+    # Omnidirectional Movement
+    thrusters["HTL"] = -joy1_data["FB"]*fb_weight + joy1_data["LR"]*lr_weight + joy1_data["TW"]*tw_weight
+    thrusters["HTR"] = -joy1_data["FB"]*fb_weight - joy1_data["LR"]*lr_weight - joy1_data["TW"]*tw_weight
+    thrusters["HBL"] = -joy1_data["FB"]*fb_weight - joy1_data["LR"]*lr_weight + joy1_data["TW"]*tw_weight
+    thrusters["HBR"] = -joy1_data["FB"]*fb_weight + joy1_data["LR"]*lr_weight - joy1_data["TW"]*tw_weight
+
+    # Mapping to Microsencond values
+    thrusters["HTL"] = map(thrusters["HTL"], -1, 1, 1000, 2000)
+    thrusters["HTR"] = map(thrusters["HTR"], -1, 1, 1000, 2000)
+    thrusters["HBL"] = map(thrusters["HBL"], -1, 1, 1000, 2000)
+    thrusters["HBR"] = map(thrusters["HBR"], -1, 1, 1000, 2000)
+
+    """ Vertical Thrusters """
+    thrusters["VTL"] = map(joy1_data["VERT"], -1, 1, 1000, 2000)
+    thrusters["VTR"] = map(joy1_data["VERT"], -1, 1, 1000, 2000)
+    thrusters["VBL"] = map(joy1_data["VERT"], -1, 1, 1000, 2000)
+    thrusters["VBR"] = map(joy1_data["VERT"], -1, 1, 1000, 2000)
+
 
 def get_send_data():
     return [
