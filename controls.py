@@ -123,11 +123,16 @@ def process_data():
     thrusters["HBL"] = map(thrusters["HBL"], -1, 1, 1000, 2000)
     thrusters["HBR"] = map(thrusters["HBR"], -1, 1, 1000, 2000)
 
-    """ Vertical Thrusters """
+    """ Vertical Thrusters (May need to change to do yaw) """
     thrusters["VTL"] = map(joy1_data["VERT"], -1, 1, 1000, 2000)
     thrusters["VTR"] = map(joy1_data["VERT"], -1, 1, 1000, 2000)
     thrusters["VBL"] = map(joy1_data["VERT"], -1, 1, 1000, 2000)
     thrusters["VBR"] = map(joy1_data["VERT"], -1, 1, 1000, 2000)
+
+    """ Arm motors and Servos """
+    arm["TILT"] = 1500
+    arm["TWIST"] = 1500
+    arm["CLAW"] = 1500
 
 
 def get_send_data():
