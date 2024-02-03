@@ -1,4 +1,18 @@
+/// Author: Graham Joonsar ///
+/// For the Whale 4 onboard control box ///
+/// All motors except the tilt are treated as servos, the tilt is treated as a stepper motor ///
+
 #include <Servo.h>
+#include <Stepper.h>
+
+/// Setting up the tilt stepper ///
+int TILT_val = 1500;
+int current_step = 0;
+// Bounds and step sized
+const int upper_bound = 54;
+const int lower_bound = -36;
+const int stepsPerRevolution = 200;
+Stepper TILT_stepper(stepsPerRevolution, 8, 9, 10, 11);
 
 // Horizontal Motors
 Servo HTL; int HTL_val = 1500;
@@ -14,7 +28,6 @@ Servo VBR; int VBR_val = 1500;
 
 Servo CAM_TILT; int CAM_TILT_val = 1500;
 
-Servo TILT; int TILT_val = 1500;
 Servo TWIST; int TWIST_val = 1500;
 Servo CLAW; int CLAW_val = 1500;
 
@@ -48,7 +61,6 @@ void ReadData(){
 }
 
 void WriteToMotors(){
-    TILT.writeMicroseconds(TILT_val);
     TWIST.writeMicroseconds(TWIST_val);
     CLAW.writeMicroseconds(CLAW_val);
     

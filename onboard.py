@@ -28,9 +28,11 @@ img1 = None
 img2 = None
 prev_img = None
 
+check1 = None
+check2 = None
+
 currentCamNum = 1
 pastCamNum = 1
-
 
 # Intialize arduino
 ard = None
@@ -43,11 +45,15 @@ while True:
         print(e)
         time.sleep(2)
 
-def process_data():
-    pass
-
-def get_view():
-    pass
+def read_img0():
+    global img0, check
+    check1, img0 = cam0.read()
+def read_img1():
+    global img1, check
+    check2, img1 = cam1.read()
+def read_img2():
+    global img1, check
+    check2, img1 = cam2.read()
 
 # Main Loop
 print("READYY TO CONNECT")
@@ -60,19 +66,37 @@ with NumpySocket() as s:
             print("CONNECTED")
             # Main loop
             while conn:
+                # Starting the threads to gather images from the cameras
+                thread0 = threading.Thread(target=read_img0)
+                thread0.start()
+                thread1 = None
+                if currentCamNum == 1:
+                    thread1 = threading.Thread(target=read_img1)
+                else:
+                    thread1 = threading.Thread(target=read_img2)
+                thread1.start()
+
+
                 # Recieving data from the laptop
                 data = conn.recv()
                 # Parsing the data
-                real_data = str(data[0:10].tolist()).replace('[', '').replace(']', '\n').replace(' ', '')
-                real_bytes = bytearray(real_data, "ascii")
-                
+                real_data = data[1:data[0]].tolist()
+                real_bytes = bytearray(str(real_data).replace('[', '').replace(']', '\n').replace(' ', ''), "ascii")
+
                 # Get which camera the pilot wants
-                currentCamNum = data[10]
+                currentCamNum = real_data[10]
 
                 # write to the arduino
                 ard.write(real_bytes)
 
-                img = get_view()
+                thread0.join()
+                thread1.join()
+                if check1 and check2:
+                    img = cv2.hconcat([img0, img1])
+                    prev_img = img
+                else:
+                    img = prev_img
+
                 try:
                     conn.sendall(img)
                 except Exception as e:

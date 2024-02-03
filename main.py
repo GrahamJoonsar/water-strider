@@ -24,12 +24,14 @@ import cv2
 import controls
 
 """ Starting the Robot """
-
 controls.init_joysticks()
 
 # Clear screen and set cursor to the top right
 print("\033[?25l")
-print("\033[2J")
+print("\033[2J") 
+
+# Vars
+cam_scale = 2
 
 # Establishing Connection and Main Loop
 port = 4444
@@ -40,6 +42,22 @@ with NumpySocket() as sock:
 
     # Main code loop
     while True:
+        # Sending the control data to the pi
+        send_data = controls.get_send_data()
+
+        # Getting pilot input
+        controls.get_input()
+        controls.process_input()
+
+        buffer = numpy.arange(1000)
+        buffer[0:len(send_data)] = numpy.array(send_data)
+        sock.sendall(buffer)
+        img = sock.recv()
+
+        img = cv2.resize(img, (int(320*2*cam_scale), int(240*cam_scale)))
+        cv2.imshow("Cameras", img)
+
+        # Stops the code
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 

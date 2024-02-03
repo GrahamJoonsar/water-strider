@@ -109,7 +109,7 @@ def get_input():
     joy2_data["RE"] = joy2.get_axis(3)
     joy2_data["TW"] = joy2.get_axis(2)
 
-def process_data():
+def process_input():
     """ Horizontal Thrusters """
     # Omnidirectional Movement
     thrusters["HTL"] = -joy1_data["FB"]*fb_weight + joy1_data["LR"]*lr_weight + joy1_data["TW"]*tw_weight
@@ -136,7 +136,7 @@ def process_data():
 
 
 def get_send_data():
-    return [
+    send_data = [
         # Arm values
         arm["TILT"], arm["TWIST"], arm["CLAW"],
 
@@ -147,3 +147,5 @@ def get_send_data():
         # Other values
         misc["CAM_TILT"], misc["CAM_NUM"],
     ]
+    send_data.insert(0, len(send_data))
+    return send_data
