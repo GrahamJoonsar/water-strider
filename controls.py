@@ -54,8 +54,8 @@ thrusters = {
     # Vertical Thrusters
     "VTL": 1500,
     "VTR": 1500,
-    "VTL": 1500,
-    "VTL": 1500
+    "VBL": 1500,
+    "VBR": 1500
 }
 
 arm = {

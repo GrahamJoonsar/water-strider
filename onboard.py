@@ -77,16 +77,15 @@ with NumpySocket() as s:
                 thread1.start()
 
 
-                # Recieving data from the laptop
+                # Recieving data from the laptop, and parsing it
                 data = conn.recv()
-                # Parsing the data
-                real_data = data[1:data[0]].tolist()
-                real_bytes = bytearray(str(real_data).replace('[', '').replace(']', '\n').replace(' ', ''), "ascii")
+                real_data = data[1:data[0]+1].tolist()
 
                 # Get which camera the pilot wants
-                currentCamNum = real_data[10]
+                currentCamNum = real_data[-1]
 
-                # write to the arduino
+                # write to the arduino (excludes cam num)
+                real_bytes = bytearray(str(real_data[:-1]).replace('[', '').replace(']', '\n').replace(' ', ''), "ascii")
                 ard.write(real_bytes)
 
                 thread0.join()
