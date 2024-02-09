@@ -59,9 +59,9 @@ thrusters = {
 }
 
 arm = {
-    "TWIST": 1500,
-    "TILT":  1500,
-    "CLAW":  1500
+    "TWIST": 0,
+    "TILT":  0,
+    "CLAW":  0
 }
 
 misc = {
@@ -129,10 +129,10 @@ def process_input():
     thrusters["VBL"] = map(joy1_data["VERT"], -1, 1, 1000, 2000)
     thrusters["VBR"] = map(joy1_data["VERT"], -1, 1, 1000, 2000)
 
-    """ Arm motors and Servos """
-    arm["TILT"] = 1500
-    arm["TWIST"] = 1500
-    arm["CLAW"] = 1500
+    """ Arm steppers (Values should range from -1 to 1) """
+    arm["TILT"] = round(joy2_data["RE"])
+    arm["TWIST"] = round(joy2_data["TW"])
+    arm["CLAW"] = 0
 
 
 def get_send_data():

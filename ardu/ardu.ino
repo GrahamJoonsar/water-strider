@@ -1,18 +1,21 @@
 /// Author: Graham Joonsar ///
 /// For the Whale 4 onboard control box ///
-/// All motors except the tilt are treated as servos, the tilt is treated as a stepper motor ///
+/// All thrusters are treated as servos, the arm only has steppers ///
 
 #include <Servo.h>
 #include <Stepper.h>
 
 /// Setting up the tilt stepper ///
-int TILT_val = 1500;
-int current_step = 0;
-// Bounds and step sized
-const int upper_bound = 54;
-const int lower_bound = -36;
-const int stepsPerRevolution = 200;
-Stepper TILT_stepper(stepsPerRevolution, 8, 9, 10, 11);
+// TODO MAKE THE PIN NUMBERS ACCURATE
+const int SPR = 200;
+Stepper TILT_stepper (SPR, 8, 9, 10, 11);   int TILT_val  = 0;
+Stepper TWIST_stepper(SPR, 12, 13, 14, 15); int TWIST_val = 0;
+Stepper CLAW_stepper (SPR, 16, 17, 18, 19); int CLAW_val  = 0;
+
+// TODO find out actually good speeds for these
+TILT_stepper.setSpeed(10);
+TWIST_stepper.setSpeed(10);
+CLAW_stepper.setSpeed(10);
 
 // Horizontal Motors
 Servo HTL; int HTL_val = 1500;
@@ -27,9 +30,6 @@ Servo VBL; int VBL_val = 1500;
 Servo VBR; int VBR_val = 1500;
 
 Servo CAM_TILT; int CAM_TILT_val = 1500;
-
-Servo TWIST; int TWIST_val = 1500;
-Servo CLAW; int CLAW_val = 1500;
 
 // Data comes in as
 // TILT,TWIST,CLAW,
@@ -61,9 +61,10 @@ void ReadData(){
 }
 
 void WriteToMotors(){
-    TWIST.writeMicroseconds(TWIST_val);
-    CLAW.writeMicroseconds(CLAW_val);
-    
+    TILT_stepper.step(TILT_val);
+    TWIST_stepper.step(TWIST_val);
+    CLAW_stepper.step(CLAW_val);
+
     HTL.writeMicroseconds(HTL_val);
     HTR.writeMicroseconds(HTR_val);
     HBL.writeMicroseconds(HBL_val);
@@ -92,10 +93,6 @@ void setup(){
     VBR.attach(0);
 
     CAM_TILT.attach(33);
-    
-    TILT.attach(27);
-    TWIST.attach(41);
-    CLAW.attach(47);
 
     WriteToMotors();
 }
