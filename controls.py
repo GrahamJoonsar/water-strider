@@ -13,6 +13,7 @@ joy2 = None
 
 def init_joysticks():
     # Attempt to open Joysticks
+    global joy1, joy2
     joys = False
     while not joys:
         try:
@@ -38,7 +39,8 @@ joy1_data = {
 }
 
 joy2_data = {
-    "TRIGGER": 0, 
+    "3": 0, 
+    "4": 0, 
     "RE": 0, 
     "TW": 0
 }
@@ -86,11 +88,13 @@ def impose_deadzone(val):
 # Buttons
 switch_cam_pressed = False
 def get_input():
+    global switch_cam_pressed
     """ First Controller (Movement) """
     # Horizontal inputs
     joy1_data["LR"] = impose_deadzone(joy1.get_hat(0)[0])
     joy1_data["FB"] = impose_deadzone(joy1.get_axis(1)) # (- = forward, + = backward) 
     joy1_data["TW"] = impose_deadzone(joy1.get_axis(2)) # (- = twist_left, + = twist_right)
+    joy1_data["RE"] = impose_deadzone(joy1.get_axis(3))
     
     # Vertical inputs
     joy1_data["VERT"] = joy1.get_button(4) - joy1.get_button(2)
@@ -104,18 +108,29 @@ def get_input():
         joy1_data["FB"] *= slowdown
         joy1_data["TW"] *= slowdown
 
+    if joy1.get_button(11):
+        if not switch_cam_pressed:
+            misc["CAM_NUM"] = 1 - misc["CAM_NUM"]
+        switch_cam_pressed = True
+    else:
+        switch_cam_pressed = False
+
     """ Second Controller (Arm) """
-    joy2_data["TRIGGER"] = joy2.get_button(0)
+    joy2_data["3"] = joy2.get_button(2)
+    joy2_data["4"] = joy2.get_button(3)
     joy2_data["RE"] = joy2.get_axis(3)
     joy2_data["TW"] = joy2.get_axis(2)
+
+    # For flushing input
+    pygame.event.get()
 
 def process_input():
     """ Horizontal Thrusters """
     # Omnidirectional Movement
     thrusters["HTL"] = -joy1_data["FB"]*fb_weight + joy1_data["LR"]*lr_weight + joy1_data["TW"]*tw_weight
     thrusters["HTR"] = -joy1_data["FB"]*fb_weight - joy1_data["LR"]*lr_weight - joy1_data["TW"]*tw_weight
-    thrusters["HBL"] = -joy1_data["FB"]*fb_weight - joy1_data["LR"]*lr_weight + joy1_data["TW"]*tw_weight
-    thrusters["HBR"] = -joy1_data["FB"]*fb_weight + joy1_data["LR"]*lr_weight - joy1_data["TW"]*tw_weight
+    thrusters["HBL"] =  joy1_data["FB"]*fb_weight + joy1_data["LR"]*lr_weight - joy1_data["TW"]*tw_weight
+    thrusters["HBR"] =  joy1_data["FB"]*fb_weight - joy1_data["LR"]*lr_weight + joy1_data["TW"]*tw_weight
 
     # Mapping to Microsencond values
     thrusters["HTL"] = map(thrusters["HTL"], -1, 1, 1000, 2000)
@@ -130,9 +145,14 @@ def process_input():
     thrusters["VBR"] = map(joy1_data["VERT"], -1, 1, 1000, 2000)
 
     """ Arm steppers (Values should range from -1 to 1) """
-    arm["TILT"] = round(joy2_data["RE"])
-    arm["TWIST"] = round(joy2_data["TW"])
-    arm["CLAW"] = 0
+    arm["TILT"] = map(joy2_data["RE"], -1, 1, 1000, 1850)
+    arm["TWIST"] = map(joy2_data["TW"], -1, 1, 1000, 2000)
+    if joy2_data["3"] != joy2_data["4"]:
+        arm["CLAW"] = joy2_data["3"] + 2 * joy2_data["4"]
+    else:
+        arm["CLAW"] = 0
+
+    misc["CAM_TILT"] = map(joy1_data["RE"], -1, 1, 1400, 2100)
 
 
 def get_send_data():
@@ -141,11 +161,21 @@ def get_send_data():
         arm["TILT"], arm["TWIST"], arm["CLAW"],
 
         # Thruster values
-        thrusters["HTL"], thrusters["HTR"], thrusters["HBL"], thrusters["HBR"],
-        thrusters["VTL"], thrusters["VTR"], thrusters["VBL"], thrusters["VBR"], 
+        thrusters["VBL"], thrusters["HBL"], thrusters["VBR"], thrusters["HBR"],
+        thrusters["HTR"], thrusters["VTR"], thrusters["HTL"], thrusters["VTL"],
+        #thrusters["HTL"], thrusters["HTR"], thrusters["HBL"], thrusters["HBR"],
+        #thrusters["VTL"], thrusters["VTR"], thrusters["VBL"], thrusters["VBR"], 
         
         # Other values
         misc["CAM_TILT"], misc["CAM_NUM"],
     ]
     send_data.insert(0, len(send_data))
     return send_data
+
+if __name__ == "__main__":
+    data = get_send_data()
+    print(data)
+    real_data = data[1:data[0]+1]
+    print(real_data)
+    real_bytes = bytearray((str(real_data[:-1]) + ",\n").replace('[', '').replace(']', '').replace(' ', ''), "ascii")
+    print(real_bytes)

@@ -1,5 +1,5 @@
 """
-Author(s): Graham Joonsar, 
+Author(s): Graham Joonsar, Jacob Banta
 
 Run pi code first, then here
 
@@ -10,7 +10,7 @@ RPI Password:
     
 SSH into RPI:
  - ssh pi@raspberrypi.local
- - cd Desktop/code
+ - cd Desktop/whale
  - python3 control.py
 
 """
@@ -24,11 +24,12 @@ import cv2
 import controls
 
 """ Starting the Robot """
+print("Initializing Joysticks")
 controls.init_joysticks()
 
 # Clear screen and set cursor to the top right
 print("\033[?25l")
-print("\033[2J") 
+print("\033[2J")
 
 # Vars
 cam_scale = 2
@@ -45,7 +46,7 @@ with NumpySocket() as sock:
         # Sending the control data to the pi
         send_data = controls.get_send_data()
 
-        # Getting pilot input
+        # Getting pilot input 
         controls.get_input()
         controls.process_input()
 

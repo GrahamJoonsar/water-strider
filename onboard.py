@@ -38,7 +38,7 @@ pastCamNum = 1
 ard = None
 while True:
     try:
-        ard = serial.Serial("/dev/ttyACM0", 9600)
+        ard = serial.Serial("/dev/ttyACM0", 115200)
         break
     except Exception as e:
         print("CANT CONNECT TO ARDUINO")

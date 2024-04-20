@@ -3,19 +3,17 @@
 /// All thrusters are treated as servos, the arm only has steppers ///
 
 #include <Servo.h>
-#include <Stepper.h>
 
-/// Setting up the tilt stepper ///
-// TODO MAKE THE PIN NUMBERS ACCURATE
-const int SPR = 200;
-Stepper TILT_stepper (SPR, 8, 9, 10, 11);   int TILT_val  = 0;
-Stepper TWIST_stepper(SPR, 12, 13, 14, 15); int TWIST_val = 0;
-Stepper CLAW_stepper (SPR, 16, 17, 18, 19); int CLAW_val  = 0;
+// Arm Servos
+Servo TWIST; int TWIST_val = 1500;
+Servo TILT;  int TILT_val = 1500;
 
-// TODO find out actually good speeds for these
-TILT_stepper.setSpeed(10);
-TWIST_stepper.setSpeed(10);
-CLAW_stepper.setSpeed(10);
+// Arm Stepper Motor
+#define CLAW 25
+#define CLAW_DIR 47
+int CLAW_val = 0;
+// This one is to keep track of the current position of the claw
+int CLAW_pos = 0;
 
 // Horizontal Motors
 Servo HTL; int HTL_val = 1500;
@@ -36,6 +34,7 @@ Servo CAM_TILT; int CAM_TILT_val = 1500;
 // HTL,HTR,HBL,HBR,
 // VTL,VTR,VBL,VBR,
 // CAM_TILT
+//1521,1501,0,1500,1500,1500,1500,1500,1500,1500,1500,1530,\n
 void ReadData(){
     // Buffer Data
     char buffer[96];
@@ -49,6 +48,7 @@ void ReadData(){
     HTR_val = atoi(strtok(NULL, ","));
     HBL_val = atoi(strtok(NULL, ","));
     HBR_val = atoi(strtok(NULL, ","));
+    
 
     VTL_val = atoi(strtok(NULL, ","));
     VTR_val = atoi(strtok(NULL, ","));
@@ -60,10 +60,31 @@ void ReadData(){
     Serial.flush();
 }
 
+void WriteToClaw(){
+//  Serial.println(CLAW_pos);
+//  if(CLAW_val == CLAW_pos)return;
+//  if(CLAW_val > CLAW_pos){
+//    digitalWrite(CLAW_DIR, HIGH);
+//    //CLAW_pos++;
+//  }else{
+//    digitalWrite(CLAW_DIR, LOW);
+//    //CLAW_pos--;
+//  }
+  if(CLAW_val == 0)return;
+  if(CLAW_val == 1){
+    digitalWrite(CLAW_DIR, HIGH);
+  }else{
+    digitalWrite(CLAW_DIR, LOW);
+  }
+  digitalWrite(CLAW, HIGH);
+  delayMicroseconds(200);
+  digitalWrite(CLAW, LOW);
+  delayMicroseconds(200);
+}
+
 void WriteToMotors(){
-    TILT_stepper.step(TILT_val);
-    TWIST_stepper.step(TWIST_val);
-    CLAW_stepper.step(CLAW_val);
+    TWIST.writeMicroseconds(TWIST_val);
+    TILT.writeMicroseconds(TILT_val);
 
     HTL.writeMicroseconds(HTL_val);
     HTR.writeMicroseconds(HTR_val);
@@ -79,18 +100,22 @@ void WriteToMotors(){
 }
 
 void setup(){
-    Serial.begin(9600);
+    Serial.begin(115200);
 
-    // PIN # NEED TO BE UPDATED!!!
-    HTL.attach(22);
-    HTR.attach(51);
-    HBL.attach(30);
+    pinMode(CLAW, OUTPUT);
+    pinMode(CLAW_DIR, OUTPUT);
+    TILT.attach(48);
+    TWIST.attach(43);
+    
+    HTL.attach(51);
+    HTR.attach(44);
+    HBL.attach(52);
     HBR.attach(38);
     
-    VTL.attach(0);
-    VTR.attach(0);
-    VBL.attach(0);
-    VBR.attach(0);
+    VTL.attach(27);
+    VTR.attach(30);
+    VBL.attach(34);
+    VBR.attach(22);
 
     CAM_TILT.attach(33);
 
@@ -102,4 +127,6 @@ void loop(){
         ReadData();
         WriteToMotors();
     }
+    // The claw has to move a lot so we shouldn't wait to recieve a message
+    WriteToClaw();
 }
