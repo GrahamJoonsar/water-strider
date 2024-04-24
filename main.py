@@ -33,6 +33,7 @@ print("\033[2J")
 
 # Vars
 cam_scale = 2
+img_count = 0
 
 # Establishing Connection and Main Loop
 port = 4444
@@ -54,6 +55,12 @@ with NumpySocket() as sock:
         buffer[0:len(send_data)] = numpy.array(send_data)
         sock.sendall(buffer)
         img = sock.recv()
+
+        if controls.capture_img():
+            h, w, channels = img.shape
+            left_part = img[:, :w//2] 
+            cv2.imwrite("images/" + str(img_count) + ".png", left_part)
+            img_count += 1
 
         img = cv2.resize(img, (int(320*2*cam_scale), int(240*cam_scale)))
         cv2.imshow("Cameras", img)

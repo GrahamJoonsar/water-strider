@@ -9,7 +9,6 @@ g = 9.8
 # Intialize arduino
 def generate_graph(depth_values):
     pressure_values = [-density*g*float(d)/1000 for d in depth_values]
-
     time_values = [5*i for i in range(len(depth_values))]
 
     figure, axis = plt.subplots(2)
@@ -40,8 +39,6 @@ while True:
 
 running = True
 while running:
-    data = ard.readline().replace('\n', ',')
-    depth_values = []
-
-
-depth_values = [0, -1, -4, -9, -100, -9, -4, -1, 0]
+    data = ard.readline().replace('\n', '')
+    depth_values = [float(val) for val in data.split(sep=',')]
+    generate_graph(depth_values)

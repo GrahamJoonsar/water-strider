@@ -141,6 +141,18 @@ def get_input():
     # For flushing input
     pygame.event.get()
 
+img_pressed = False
+def capture_img():
+    ret = False
+    global img_pressed
+    if joy1.get_button(11) == 1:
+        if not img_pressed:
+            ret = True
+        img_pressed = True
+    else:
+        img_pressed = False
+    return ret
+
 def process_input():
     """ Horizontal Thrusters """
     # Omnidirectional Movement
@@ -192,11 +204,3 @@ def get_send_data():
     ]
     send_data.insert(0, len(send_data))
     return send_data
-
-if __name__ == "__main__":
-    data = get_send_data()
-    print(data)
-    real_data = data[1:data[0]+1]
-    print(real_data)
-    real_bytes = bytearray((str(real_data[:-1]) + ",\n").replace('[', '').replace(']', '').replace(' ', ''), "ascii")
-    print(real_bytes)
