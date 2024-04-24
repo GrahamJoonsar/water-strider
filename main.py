@@ -6,7 +6,7 @@ Run pi code first, then here
 This is the code for the surface laptop.
 
 RPI Password:
- - password
+ - password-
     
 SSH into RPI:
  - ssh pi@raspberrypi.local

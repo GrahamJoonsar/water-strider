@@ -125,8 +125,8 @@ void setup(){
 void loop(){
     if (Serial.available()){
         ReadData();
-        WriteToMotors();
     }
+    WriteToMotors();
     // The claw has to move a lot so we shouldn't wait to recieve a message
     WriteToClaw();
 }

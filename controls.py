@@ -3,7 +3,7 @@ import pygame, time
 # Helpful to convert Joystick to servo values
 def map(t, min, max, new_min, new_max):
     return float((new_max - new_min) * (t - min)) / (max - min) + new_min 
-
+ 
 # Initialize pygame / joysticks
 pygame.init()
 pygame.joystick.init()
@@ -46,6 +46,20 @@ joy2_data = {
 }
 
 """ Values for the Robot """
+prev_thrusters = {
+    # Horizontal Thrusters
+    "HTL": 1500,
+    "HTR": 1500,
+    "HBL": 1500,
+    "HBR": 1500,
+
+    # Vertical Thrusters
+    "VTL": 1500,
+    "VTR": 1500,
+    "VBL": 1500,
+    "VBR": 1500
+}
+
 thrusters = {
     # Horizontal Thrusters
     "HTL": 1500,
@@ -61,7 +75,7 @@ thrusters = {
 }
 
 arm = {
-    "TWIST": 0,
+    "TWIST": 1500,
     "TILT":  0,
     "CLAW":  0
 }
@@ -77,6 +91,7 @@ lr_weight = 0.4
 tw_weight = 0.2
 deadzone = 0.2
 slowdown = 0.5
+retain = 0.9
 
 
 def impose_deadzone(val):
@@ -118,6 +133,8 @@ def get_input():
     """ Second Controller (Arm) """
     joy2_data["3"] = joy2.get_button(2)
     joy2_data["4"] = joy2.get_button(3)
+    joy2_data["5"] = joy2.get_button(4)
+    joy2_data["6"] = joy2.get_button(5)
     joy2_data["RE"] = joy2.get_axis(3)
     joy2_data["TW"] = joy2.get_axis(2)
 
@@ -139,14 +156,18 @@ def process_input():
     thrusters["HBR"] = map(thrusters["HBR"], -1, 1, 1000, 2000)
 
     """ Vertical Thrusters (May need to change to do yaw) """
-    thrusters["VTL"] = map(joy1_data["VERT"], -1, 1, 1000, 2000)
-    thrusters["VTR"] = map(joy1_data["VERT"], -1, 1, 1000, 2000)
-    thrusters["VBL"] = map(joy1_data["VERT"], -1, 1, 1000, 2000)
-    thrusters["VBR"] = map(joy1_data["VERT"], -1, 1, 1000, 2000)
+    thrusters["VTL"] = map(joy1_data["VERT"], -1, 1, 1400, 1600)
+    thrusters["VTR"] = map(joy1_data["VERT"], -1, 1, 1400, 1600)
+    thrusters["VBL"] = map(joy1_data["VERT"], -1, 1, 1400, 1600)
+    thrusters["VBR"] = map(joy1_data["VERT"], -1, 1, 1400, 1600)
 
     """ Arm steppers (Values should range from -1 to 1) """
     arm["TILT"] = map(joy2_data["RE"], -1, 1, 1000, 1850)
-    arm["TWIST"] = map(joy2_data["TW"], -1, 1, 1000, 2000)
+    if joy2_data["5"] == 1 and arm["TWIST"] > 1000:
+        arm["TWIST"] -= 1
+    if joy2_data["6"] == 1 and arm["TWIST"] < 2000:
+        arm["TWIST"] += 1
+    
     if joy2_data["3"] != joy2_data["4"]:
         arm["CLAW"] = joy2_data["3"] + 2 * joy2_data["4"]
     else:
@@ -156,15 +177,15 @@ def process_input():
 
 
 def get_send_data():
+    for t in prev_thrusters:
+        prev_thrusters[t] = prev_thrusters[t]*retain + thrusters[t]*(1-retain)
     send_data = [
         # Arm values
         arm["TILT"], arm["TWIST"], arm["CLAW"],
 
         # Thruster values
-        thrusters["VBL"], thrusters["HBL"], thrusters["VBR"], thrusters["HBR"],
-        thrusters["HTR"], thrusters["VTR"], thrusters["HTL"], thrusters["VTL"],
-        #thrusters["HTL"], thrusters["HTR"], thrusters["HBL"], thrusters["HBR"],
-        #thrusters["VTL"], thrusters["VTR"], thrusters["VBL"], thrusters["VBR"], 
+        prev_thrusters["VBL"], prev_thrusters["HBL"], prev_thrusters["VBR"], prev_thrusters["HBR"],
+        prev_thrusters["HTR"], prev_thrusters["VTR"], prev_thrusters["HTL"], prev_thrusters["VTL"],
         
         # Other values
         misc["CAM_TILT"], misc["CAM_NUM"],
