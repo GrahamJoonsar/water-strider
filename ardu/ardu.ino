@@ -7,13 +7,7 @@
 // Arm Servos
 Servo TWIST; int TWIST_val = 1500;
 Servo TILT;  int TILT_val = 1500;
-
-// Arm Stepper Motor
-#define CLAW 25
-#define CLAW_DIR 47
-int CLAW_val = 0;
-// This one is to keep track of the current position of the claw
-int CLAW_pos = 0;
+Servo CLAW;  int CLAW_val = 1500;
 
 // Horizontal Motors
 Servo HTL; int HTL_val = 1500;
@@ -60,31 +54,10 @@ void ReadData(){
     Serial.flush();
 }
 
-void WriteToClaw(){
-//  Serial.println(CLAW_pos);
-//  if(CLAW_val == CLAW_pos)return;
-//  if(CLAW_val > CLAW_pos){
-//    digitalWrite(CLAW_DIR, HIGH);
-//    //CLAW_pos++;
-//  }else{
-//    digitalWrite(CLAW_DIR, LOW);
-//    //CLAW_pos--;
-//  }
-  if(CLAW_val == 0)return;
-  if(CLAW_val == 1){
-    digitalWrite(CLAW_DIR, HIGH);
-  }else{
-    digitalWrite(CLAW_DIR, LOW);
-  }
-  digitalWrite(CLAW, HIGH);
-  delayMicroseconds(200);
-  digitalWrite(CLAW, LOW);
-  delayMicroseconds(200);
-}
-
 void WriteToMotors(){
     TWIST.writeMicroseconds(TWIST_val);
     TILT.writeMicroseconds(TILT_val);
+    CLAW.writeMicroseconds(CLAW_val);
 
     HTL.writeMicroseconds(HTL_val);
     HTR.writeMicroseconds(HTR_val);
@@ -101,11 +74,10 @@ void WriteToMotors(){
 
 void setup(){
     Serial.begin(115200);
-
-    pinMode(CLAW, OUTPUT);
-    pinMode(CLAW_DIR, OUTPUT);
+    
     TILT.attach(48);
     TWIST.attach(43);
+    CLAW.attach(00);
     
     HTL.attach(51);
     HTR.attach(44);
@@ -127,6 +99,4 @@ void loop(){
         ReadData();
     }
     WriteToMotors();
-    // The claw has to move a lot so we shouldn't wait to recieve a message
-    WriteToClaw();
 }

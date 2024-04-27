@@ -39,8 +39,8 @@ joy1_data = {
 }
 
 joy2_data = {
-    "3": 0, 
-    "4": 0, 
+    "5": 0, 
+    "6": 0, 
     "RE": 0, 
     "TW": 0
 }
@@ -76,8 +76,8 @@ thrusters = {
 
 arm = {
     "TWIST": 1500,
-    "TILT":  0,
-    "CLAW":  0
+    "TILT":  1500,
+    "CLAW":  1500
 }
 
 misc = {
@@ -109,7 +109,7 @@ def get_input():
     joy1_data["LR"] = impose_deadzone(joy1.get_hat(0)[0])
     joy1_data["FB"] = impose_deadzone(joy1.get_axis(1)) # (- = forward, + = backward) 
     joy1_data["TW"] = impose_deadzone(joy1.get_axis(2)) # (- = twist_left, + = twist_right)
-    joy1_data["RE"] = impose_deadzone(joy1.get_axis(3))
+    joy1_data["RE"] = -impose_deadzone(joy1.get_axis(3))
     
     # Vertical inputs
     joy1_data["VERT"] = joy1.get_button(4) - joy1.get_button(2)
@@ -131,11 +131,9 @@ def get_input():
         switch_cam_pressed = False
 
     """ Second Controller (Arm) """
-    joy2_data["3"] = joy2.get_button(2)
-    joy2_data["4"] = joy2.get_button(3)
     joy2_data["5"] = joy2.get_button(4)
     joy2_data["6"] = joy2.get_button(5)
-    joy2_data["RE"] = joy2.get_axis(3)
+    joy2_data["RE"] = -joy2.get_axis(3)
     joy2_data["TW"] = joy2.get_axis(2)
 
     # For flushing input
@@ -168,22 +166,18 @@ def process_input():
     thrusters["HBR"] = map(thrusters["HBR"], -1, 1, 1000, 2000)
 
     """ Vertical Thrusters (May need to change to do yaw) """
-    thrusters["VTL"] = map(joy1_data["VERT"], -1, 1, 1400, 1600)
-    thrusters["VTR"] = map(joy1_data["VERT"], -1, 1, 1400, 1600)
-    thrusters["VBL"] = map(joy1_data["VERT"], -1, 1, 1400, 1600)
-    thrusters["VBR"] = map(joy1_data["VERT"], -1, 1, 1400, 1600)
+    thrusters["VTL"] = map(joy1_data["VERT"], -1, 1, 1200, 1800)
+    thrusters["VTR"] = map(joy1_data["VERT"], -1, 1, 1200, 1800)
+    thrusters["VBL"] = map(joy1_data["VERT"], -1, 1, 1200, 1800)
+    thrusters["VBR"] = map(joy1_data["VERT"], -1, 1, 1200, 1800)
 
     """ Arm steppers (Values should range from -1 to 1) """
     arm["TILT"] = map(joy2_data["RE"], -1, 1, 1000, 1850)
-    if joy2_data["5"] == 1 and arm["TWIST"] > 1000:
-        arm["TWIST"] -= 1
-    if joy2_data["6"] == 1 and arm["TWIST"] < 2000:
-        arm["TWIST"] += 1
-    
-    if joy2_data["3"] != joy2_data["4"]:
-        arm["CLAW"] = joy2_data["3"] + 2 * joy2_data["4"]
-    else:
-        arm["CLAW"] = 0
+    arm["TWIST"] = map(joy2_data["TW"], -1, 1, 1000, 2000)
+    if joy2_data["5"] == 1 and arm["CLAW"] > 1000:
+        arm["CLAW"] -= 1
+    if joy2_data["6"] == 1 and arm["CLAW"] < 2000:
+        arm["CLAW"] += 1
 
     misc["CAM_TILT"] = map(joy1_data["RE"], -1, 1, 1400, 2100)
 

@@ -8,6 +8,7 @@ g = 9.8
 
 # Intialize arduino
 def generate_graph(depth_values):
+    global density, g
     pressure_values = [-density*g*float(d)/1000 for d in depth_values]
     time_values = [5*i for i in range(len(depth_values))]
 
