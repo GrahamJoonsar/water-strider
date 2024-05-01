@@ -6,7 +6,7 @@
 
 // Arm Servos
 Servo TWIST; int TWIST_val = 1500;
-Servo TILT;  int TILT_val = 1500;
+Servo TILT;  int TILT_val = 1700;
 Servo CLAW;  int CLAW_val = 1500;
 
 // Horizontal Motors
@@ -30,6 +30,7 @@ Servo CAM_TILT; int CAM_TILT_val = 1500;
 // CAM_TILT
 //1521,1501,0,1500,1500,1500,1500,1500,1500,1500,1500,1530,\n
 void ReadData(){
+    if (!Serial.available()) return;
     // Buffer Data
     char buffer[96];
     Serial.readBytesUntil('\n', buffer, 96);
@@ -74,10 +75,10 @@ void WriteToMotors(){
 
 void setup(){
     Serial.begin(115200);
-    
+    a
     TILT.attach(48);
     TWIST.attach(43);
-    CLAW.attach(00);
+    CLAW.attach(24);
     
     HTL.attach(51);
     HTR.attach(44);
@@ -95,8 +96,6 @@ void setup(){
 }
 
 void loop(){
-    if (Serial.available()){
-        ReadData();
-    }
     WriteToMotors();
+    ReadData();
 }

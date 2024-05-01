@@ -28,8 +28,8 @@ print("Initializing Joysticks")
 controls.init_joysticks()
 
 # Clear screen and set cursor to the top right
-print("\033[?25l")
-print("\033[2J")
+#print("\033[?25l")
+#print("\033[2J")
 
 # Vars
 cam_scale = 2
@@ -58,12 +58,12 @@ with NumpySocket() as sock:
 
         if controls.capture_img():
             h, w, channels = img.shape
-            left_part = img[:, :w//2] 
+            left_part = img[:, :w//2]
             cv2.imwrite("images/coral" + str(img_count) + ".png", left_part)
             img_count += 1
-
-        img = cv2.resize(img, (int(320*2*cam_scale), int(240*cam_scale)))
-        cv2.imshow("Cameras", img)
+        else:
+            img = cv2.resize(img, (int(320*2*cam_scale), int(240*cam_scale)))
+            cv2.imshow("Cameras", img)
 
         # Stops the code
         if cv2.waitKey(1) & 0xFF == ord('q'):

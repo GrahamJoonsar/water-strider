@@ -83,6 +83,7 @@ arm = {
 misc = {
     "CAM_TILT": 1500,
     "CAM_NUM": 0,
+    "TAKE_PICTURE": 0,
 }
 
 # Important Values
@@ -116,6 +117,7 @@ def get_input():
 
     # Misc inputs
     joy1_data["CAM_TILT"] = joy1.get_axis(3)
+    #misc["TAKE_PICTURE"] = 1 if capture_img() else 0
 
     # Slowdown button pressed
     if joy1.get_button(1) == 1:
@@ -131,8 +133,8 @@ def get_input():
         switch_cam_pressed = False
 
     """ Second Controller (Arm) """
-    joy2_data["5"] = joy2.get_button(4)
-    joy2_data["6"] = joy2.get_button(5)
+    joy2_data["3"] = joy2.get_button(2)
+    joy2_data["4"] = joy2.get_button(3)
     joy2_data["RE"] = -joy2.get_axis(3)
     joy2_data["TW"] = joy2.get_axis(2)
 
@@ -143,7 +145,7 @@ img_pressed = False
 def capture_img():
     ret = False
     global img_pressed
-    if joy1.get_button(11) == 1:
+    if joy2.get_button(11) == 1:
         if not img_pressed:
             ret = True
         img_pressed = True
@@ -174,12 +176,12 @@ def process_input():
     """ Arm steppers (Values should range from -1 to 1) """
     arm["TILT"] = map(joy2_data["RE"], -1, 1, 1000, 1850)
     arm["TWIST"] = map(joy2_data["TW"], -1, 1, 1000, 2000)
-    if joy2_data["5"] == 1 and arm["CLAW"] > 1000:
-        arm["CLAW"] -= 1
-    if joy2_data["6"] == 1 and arm["CLAW"] < 2000:
-        arm["CLAW"] += 1
+    if joy2_data["3"] == 1 and arm["CLAW"] > 1020:
+        arm["CLAW"] -= 20
+    if joy2_data["4"] == 1 and arm["CLAW"] < 1720:
+        arm["CLAW"] += 20
 
-    misc["CAM_TILT"] = map(joy1_data["RE"], -1, 1, 1400, 2100)
+    misc["CAM_TILT"] = map(joy1_data["RE"], -1, 1, 1100, 2100)
 
 
 def get_send_data():
@@ -194,7 +196,7 @@ def get_send_data():
         prev_thrusters["HTR"], prev_thrusters["VTR"], prev_thrusters["HTL"], prev_thrusters["VTL"],
         
         # Other values
-        misc["CAM_TILT"], misc["CAM_NUM"],
+        misc["CAM_TILT"], misc["TAKE_PICTURE"], misc["CAM_NUM"],
     ]
     send_data.insert(0, len(send_data))
     return send_data
