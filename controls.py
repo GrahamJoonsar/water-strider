@@ -76,7 +76,7 @@ thrusters = {
 
 arm = {
     "TWIST": 1500,
-    "TILT":  1500,
+    "TILT":  1700,
     "CLAW":  1500
 }
 
