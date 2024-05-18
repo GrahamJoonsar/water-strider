@@ -75,7 +75,7 @@ void WriteToMotors(){
 
 void setup(){
     Serial.begin(115200);
-    a
+    
     TILT.attach(48);
     TWIST.attach(43);
     CLAW.attach(24);

@@ -36,12 +36,18 @@ def isolate_red(img):
     output_img[np.where(mask==0)] = 0
     return output_img
 
-#cam = cv2.VideoCapture(0)
-#while True:
-#    ret, img = cam.read()
-#if not ret:
-#    print("failed to grab frame")
-#    break
+cam = cv2.VideoCapture(0)
+while True:
+    ret, img = cam.read()
+    red_img = isolate_red(img)
+    cv2.imshow("title", red_img)
+    if cv2.waitKey(1) & 0xFF == ord('q'): 
+        break
+  
+cam.release()
+cv2.destroyAllWindows()
+
+"""
 img = cv2.imread("autonomous/image.png")
 red_img = isolate_red(cv2.GaussianBlur(img,(5,5),0)) 
 gray = cv2.cvtColor(red_img, cv2.COLOR_BGR2GRAY) 
@@ -54,3 +60,4 @@ for i in range(1, len(contours)):
 cv2.imshow("test", red_img)
 while True:
     k = cv2.waitKey(1)
+"""

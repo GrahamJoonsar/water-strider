@@ -13,7 +13,7 @@ SSH into RPI:
  - cd Desktop/whale
  - python3 control.py
 
-"""
+""" 
 
 # External Libs
 from numpysocket import NumpySocket
@@ -59,7 +59,7 @@ with NumpySocket() as sock:
         if controls.capture_img():
             h, w, channels = img.shape
             left_part = img[:, :w//2]
-            cv2.imwrite("images/coral" + str(img_count) + ".png", left_part)
+            cv2.imwrite("images/image.png", left_part)
             img_count += 1
         else:
             img = cv2.resize(img, (int(320*2*cam_scale), int(240*cam_scale)))
