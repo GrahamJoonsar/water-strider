@@ -143,14 +143,26 @@ def get_input():
 
 img_pressed = False
 def capture_img():
-    ret = False
     global img_pressed
+    ret = False
     if joy2.get_button(11) == 1:
         if not img_pressed:
             ret = True
         img_pressed = True
     else:
         img_pressed = False
+    return ret
+
+auto_pressed = False
+def auto_started():
+    global auto_pressed
+    ret = False
+    if joy1.get_button(12):
+        if not auto_pressed:
+            ret = True
+        auto_pressed = True
+    else: 
+        auto_pressed = False
     return ret
 
 def process_input():

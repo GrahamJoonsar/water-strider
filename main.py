@@ -22,6 +22,7 @@ import cv2
 
 # Internal libs
 import controls
+import transplanter
 
 """ Starting the Robot """
 print("Initializing Joysticks")
@@ -34,6 +35,8 @@ controls.init_joysticks()
 # Vars
 cam_scale = 2
 img_count = 0
+auto_control = False
+auto_img = None
 
 # Establishing Connection and Main Loop
 port = 4444
@@ -45,16 +48,28 @@ with NumpySocket() as sock:
     # Main code loop
     while True:
         # Sending the control data to the pi
-        send_data = controls.get_send_data()
+        send_data = []
+        if not auto_control:
+            send_data = controls.get_send_data()
+        else:
+            ret = transplanter.get_send_data(auto_img)
+            send_data = ret[:-1]
+            if ret[-1] == 1:
+                auto_control = False
 
         # Getting pilot input 
         controls.get_input()
         controls.process_input()
 
-        buffer = numpy.arange(1000)
+        if controls.auto_started():
+            transplanter.intialize_autonomous()
+            auto_control = True
+
+        buffer = numpy.zeros(500)
         buffer[0:len(send_data)] = numpy.array(send_data)
         sock.sendall(buffer)
         img = sock.recv()
+        auto_img = img[:, img.shape[1]//2:]  
 
         if controls.capture_img():
             h, w, channels = img.shape
