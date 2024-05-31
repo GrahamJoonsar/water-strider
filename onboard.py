@@ -10,8 +10,8 @@ import cv2
 
 # Initialize cameras
 # Must intialize from greatest to least (idk why)
-res_w = 320
-res_h = 240
+res_w = 640
+res_h = 480
 
 def list_ports():
     """
@@ -41,13 +41,13 @@ def list_ports():
 
 #list_ports()
 
-cam0 = cv2.VideoCapture(8, cv2.CAP_ANY)
+cam0 = cv2.VideoCapture(8)
 cam0.set(3, res_w)
 cam0.set(4, res_h)
-cam1 = cv2.VideoCapture(4, cv2.CAP_ANY)
+cam1 = cv2.VideoCapture(4)
 cam1.set(3, res_w)
 cam1.set(4, res_h)
-cam2 = cv2.VideoCapture(0, cv2.CAP_ANY)
+cam2 = cv2.VideoCapture(0)
 cam2.set(3, res_w)
 cam2.set(4, res_h)
 
@@ -117,7 +117,7 @@ with NumpySocket() as s:
             while conn:
                 # Recieving data from the laptop, and parsing it
                 data = conn.recv()
-                real_data = data[1:data[0]+1].tolist()
+                real_data = data[1:int(data[0])+1].tolist()
 
 
                 get_hd = real_data[-2]

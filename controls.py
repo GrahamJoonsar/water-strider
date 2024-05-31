@@ -157,7 +157,7 @@ auto_pressed = False
 def auto_started():
     global auto_pressed
     ret = False
-    if joy1.get_button(12):
+    if joy1.get_button(7):
         if not auto_pressed:
             ret = True
         auto_pressed = True
@@ -210,5 +210,7 @@ def get_send_data():
         # Other values
         misc["CAM_TILT"], misc["TAKE_PICTURE"], misc["CAM_NUM"],
     ]
+    for i in range(len(send_data)):
+        send_data[i] = int(send_data[i])
     send_data.insert(0, len(send_data))
     return send_data

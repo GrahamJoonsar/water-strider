@@ -48,14 +48,14 @@ with NumpySocket() as sock:
     # Main code loop
     while True:
         # Sending the control data to the pi
-        send_data = []
-        if not auto_control:
-            send_data = controls.get_send_data()
-        else:
-            ret = transplanter.get_send_data(auto_img)
-            send_data = ret[:-1]
-            if ret[-1] == 1:
-                auto_control = False
+        send_data = controls.get_send_data()
+        #if not auto_control:
+        #    send_data = controls.get_send_data()
+        #else:
+        #    ret = transplanter.get_send_data(auto_img)
+        #    send_data = ret[:-1]
+        #    if ret[-1] == 1:
+        #        auto_control = False
 
         # Getting pilot input 
         controls.get_input()
@@ -65,11 +65,12 @@ with NumpySocket() as sock:
             transplanter.intialize_autonomous()
             auto_control = True
 
-        buffer = numpy.zeros(500)
+        buffer = numpy.zeros(1000)
         buffer[0:len(send_data)] = numpy.array(send_data)
         sock.sendall(buffer)
         img = sock.recv()
-        auto_img = img[:, img.shape[1]//2:]  
+        h, w, channels = img.shape
+        auto_img = img[:, w//2:]
 
         if controls.capture_img():
             h, w, channels = img.shape
